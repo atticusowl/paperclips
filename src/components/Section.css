@@ -1,0 +1,109 @@
+.section {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+.section h3 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.section hr {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 8px 0 12px 0;
+}
+
+.section p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.section p.small {
+  font-size: 11px;
+  color: #888;
+}
+
+.section .value {
+  color: #00ff88;
+  font-weight: bold;
+}
+
+.section .level {
+  color: #00ff88;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.section .cost {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.section .status {
+  margin-left: 8px;
+  color: #00ff88;
+  font-weight: bold;
+}
+
+.section button {
+  background: #333;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.section button:hover:not(:disabled) {
+  background: #444;
+  border-color: #00ff88;
+}
+
+.section button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.section button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Price controls */
+.price-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.price-controls button {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+/* Wire section */
+.wire-section,
+.clipper-section,
+.mega-clipper-section,
+.marketing-section {
+  margin: 12px 0;
+  padding: 8px;
+  background: #252525;
+  border-radius: 3px;
+}
+
+.wire-buyer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}

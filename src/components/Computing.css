@@ -1,0 +1,43 @@
+.computing .trust-section {
+  margin-bottom: 10px;
+}
+
+.computing .resource-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.computing .resource-controls button {
+  min-width: 100px;
+}
+
+.computing .level {
+  font-weight: bold;
+  color: #00ff88;
+}
+
+.quantum-section {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #333;
+}
+
+.quantum-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.qchips {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.qchip {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  transition: opacity 0.05s ease;
+}

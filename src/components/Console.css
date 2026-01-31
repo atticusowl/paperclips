@@ -1,0 +1,40 @@
+.console-container {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 10px;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 20px;
+}
+
+.console-old {
+  color: #666;
+  font-size: 12px;
+}
+
+.console-line {
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.console-line.current {
+  color: #00ff00;
+  font-size: 14px;
+}
+
+.prompt {
+  color: #888;
+}
+
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+}
+
+.pulsate {
+  animation: pulsate 1s ease-in-out infinite;
+}
+
+@keyframes pulsate {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

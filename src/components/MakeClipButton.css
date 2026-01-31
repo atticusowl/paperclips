@@ -1,0 +1,32 @@
+.make-clip-button {
+  background: linear-gradient(180deg, #444 0%, #333 100%);
+  border: 2px solid #00ff88;
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: 20px;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.make-clip-button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #555 0%, #444 100%);
+  border-color: #00ffaa;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.make-clip-button:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+}
+
+.make-clip-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #555;
+}
