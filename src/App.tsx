@@ -8,6 +8,7 @@ import { Computing } from './components/Computing';
 import { Projects } from './components/Projects';
 import { Strategy } from './components/Strategy';
 import { Investment } from './components/Investment';
+import { Cheats } from './components/Cheats';
 import { useGameStore } from './store/gameStore';
 import './App.css';
 
@@ -59,6 +60,9 @@ function App() {
           </button>
         </div>
       </div>
+      
+      {/* Cheat Panel */}
+      <Cheats />
     </div>
   );
 }

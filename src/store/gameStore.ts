@@ -227,6 +227,14 @@ interface GameActions {
   
   // Flags
   setFlag: (flag: keyof GameState['flags'], value: boolean) => void;
+  
+  // Cheats
+  cheatFunds: (amount: number) => void;
+  cheatOps: (amount: number) => void;
+  cheatCreativity: (amount: number) => void;
+  cheatTrust: (amount: number) => void;
+  cheatYomi: (amount: number) => void;
+  cheatWire: (amount: number) => void;
 }
 
 type GameStore = GameState & GameActions;
@@ -962,6 +970,61 @@ export const useGameStore = create<GameStore>()(
           flags: {
             ...s.flags,
             [flag]: value,
+          },
+        }));
+      },
+      
+      // Cheats
+      cheatFunds: (amount: number) => {
+        set((s) => ({
+          business: {
+            ...s.business,
+            funds: s.business.funds + amount,
+          },
+        }));
+      },
+      
+      cheatOps: (amount: number) => {
+        set((s) => ({
+          computing: {
+            ...s.computing,
+            operations: Math.min(s.computing.operations + amount, s.computing.maxOps),
+          },
+        }));
+      },
+      
+      cheatCreativity: (amount: number) => {
+        set((s) => ({
+          computing: {
+            ...s.computing,
+            creativity: s.computing.creativity + amount,
+          },
+        }));
+      },
+      
+      cheatTrust: (amount: number) => {
+        set((s) => ({
+          computing: {
+            ...s.computing,
+            trust: s.computing.trust + amount,
+          },
+        }));
+      },
+      
+      cheatYomi: (amount: number) => {
+        set((s) => ({
+          strategic: {
+            ...s.strategic,
+            yomi: s.strategic.yomi + amount,
+          },
+        }));
+      },
+      
+      cheatWire: (amount: number) => {
+        set((s) => ({
+          manufacturing: {
+            ...s.manufacturing,
+            wire: s.manufacturing.wire + amount,
           },
         }));
       },
