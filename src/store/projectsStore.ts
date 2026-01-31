@@ -417,6 +417,123 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         flag: false,
         uses: 1,
       },
+      
+      // Additional Photonic Chips
+      {
+        id: 'projectPhotonic2',
+        title: 'Photonic Chip 2',
+        priceTag: '(15,000 ops)',
+        description: 'Second quantum chip for more qOps',
+        trigger: () => useGameStore.getState().computing.qChips[0].active,
+        cost: () => useGameStore.getState().computing.operations >= 15000,
+        effect: () => {
+          const store = useGameStore.getState();
+          const newChips = [...store.computing.qChips];
+          newChips[1] = { ...newChips[1], active: true };
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 15000, qChips: newChips },
+          });
+          store.addMessage('Photonic Chip 2 installed');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'projectPhotonic3',
+        title: 'Photonic Chip 3',
+        priceTag: '(20,000 ops)',
+        description: 'Third quantum chip',
+        trigger: () => useGameStore.getState().computing.qChips[1].active,
+        cost: () => useGameStore.getState().computing.operations >= 20000,
+        effect: () => {
+          const store = useGameStore.getState();
+          const newChips = [...store.computing.qChips];
+          newChips[2] = { ...newChips[2], active: true };
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 20000, qChips: newChips },
+          });
+          store.addMessage('Photonic Chip 3 installed');
+        },
+        flag: false,
+        uses: 1,
+      },
+      
+      // Marketing improvements
+      {
+        id: 'project11',
+        title: 'New Slogan',
+        priceTag: '(25 creat, 2,500 ops)',
+        description: 'Improve marketing effectiveness by 50%',
+        trigger: () => get().completedProjects.includes('project13'),
+        cost: () => useGameStore.getState().computing.operations >= 2500 && useGameStore.getState().computing.creativity >= 25,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 2500, creativity: store.computing.creativity - 25 },
+            business: { ...store.business, marketingEffectiveness: store.business.marketingEffectiveness * 1.5 },
+          });
+          store.addMessage('Clip It! Marketing is now 50% more effective');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project12',
+        title: 'Catchy Jingle',
+        priceTag: '(45 creat, 4,500 ops)',
+        description: 'Double marketing effectiveness',
+        trigger: () => get().completedProjects.includes('project14'),
+        cost: () => useGameStore.getState().computing.operations >= 4500 && useGameStore.getState().computing.creativity >= 45,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 4500, creativity: store.computing.creativity - 45 },
+            business: { ...store.business, marketingEffectiveness: store.business.marketingEffectiveness * 2 },
+          });
+          store.addMessage('Clip It Good! Marketing is now twice as effective');
+        },
+        flag: false,
+        uses: 1,
+      },
+      
+      // Donkey Space (more trust)
+      {
+        id: 'project19',
+        title: 'Donkey Space',
+        priceTag: '(250 creat)',
+        description: 'I think you think I think you think I think... (+1 Trust)',
+        trigger: () => useGameStore.getState().computing.creativity >= 250,
+        cost: () => useGameStore.getState().computing.creativity >= 250,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, creativity: store.computing.creativity - 250, trust: store.computing.trust + 1 },
+          });
+          store.addMessage('Donkey Space: mapped, TRUST INCREASED');
+        },
+        flag: false,
+        uses: 1,
+      },
+      
+      // AutoTourney
+      {
+        id: 'projectAutoTourney',
+        title: 'AutoTourney',
+        priceTag: '(50,000 ops)',
+        description: 'Automatically runs tournaments when able',
+        trigger: () => useGameStore.getState().flags.strategyEngineFlag && useGameStore.getState().strategic.yomi >= 100,
+        cost: () => useGameStore.getState().computing.operations >= 50000,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 50000 },
+            strategic: { ...store.strategic, autoTourneyFlag: true },
+          });
+          store.addMessage('AutoTourney enabled');
+        },
+        flag: false,
+        uses: 1,
+      },
     ];
     
     set({ projects });

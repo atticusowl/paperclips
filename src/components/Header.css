@@ -19,3 +19,13 @@
   color: #00ff88;
   font-weight: bold;
 }
+
+.clip-rate {
+  font-size: 14px;
+  color: #888;
+  margin: 5px 0 0 0;
+}
+
+.clip-rate .rate {
+  color: #00cc66;
+}
