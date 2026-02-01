@@ -340,7 +340,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         title: 'Investment Engine',
         priceTag: '(10,000 ops)',
         description: 'Allows investment of idle funds',
-        trigger: () => useGameStore.getState().business.funds >= 10000,
+        trigger: () => useGameStore.getState().computing.trust >= 7,
         cost: () => useGameStore.getState().computing.operations >= 10000,
         effect: () => {
           const store = useGameStore.getState();
@@ -361,7 +361,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         title: 'Strategic Modeling',
         priceTag: '(12,000 ops)',
         description: 'Unlocks strategic tournament system for yomi generation',
-        trigger: () => useGameStore.getState().computing.trust >= 7,
+        trigger: () => get().completedProjects.includes('project19'),
         cost: () => useGameStore.getState().computing.operations >= 12000,
         effect: () => {
           const store = useGameStore.getState();
@@ -381,7 +381,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         title: 'Quantum Computing',
         priceTag: '(10,000 ops)',
         description: 'Unlocks quantum chips for burst operations',
-        trigger: () => useGameStore.getState().computing.trust >= 10,
+        trigger: () => useGameStore.getState().computing.processors >= 5,
         cost: () => useGameStore.getState().computing.operations >= 10000,
         effect: () => {
           const store = useGameStore.getState();
@@ -516,14 +516,20 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       {
         id: 'projectAutoTourney',
         title: 'AutoTourney',
-        priceTag: '(50,000 ops)',
+        priceTag: '(50,000 ops, 50,000 creat)',
         description: 'Automatically runs tournaments when able',
         trigger: () => useGameStore.getState().flags.strategyEngineFlag && useGameStore.getState().strategic.yomi >= 100,
-        cost: () => useGameStore.getState().computing.operations >= 50000,
+        cost: () =>
+          useGameStore.getState().computing.operations >= 50000 &&
+          useGameStore.getState().computing.creativity >= 50000,
         effect: () => {
           const store = useGameStore.getState();
           useGameStore.setState({
-            computing: { ...store.computing, operations: store.computing.operations - 50000 },
+            computing: {
+              ...store.computing,
+              operations: store.computing.operations - 50000,
+              creativity: store.computing.creativity - 50000,
+            },
             strategic: { ...store.strategic, autoTourneyFlag: true },
           });
           store.addMessage('AutoTourney enabled');
