@@ -229,6 +229,25 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         flag: false,
         uses: 1,
       },
+      {
+        id: 'project41',
+        title: 'Nanoscale Wire Production',
+        priceTag: '(35,000 ops)',
+        description: '100x more wire supply from every spool',
+        trigger: () => useGameStore.getState().manufacturing.wireSupply >= 10000,
+        cost: () => useGameStore.getState().computing.operations >= 35000,
+        effect: () => {
+          const store = useGameStore.getState();
+          const newSupply = Math.floor(store.manufacturing.wireSupply * 100);
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 35000 },
+            manufacturing: { ...store.manufacturing, wireSupply: newSupply },
+          });
+          store.addMessage(`Nanoscale Wire Production complete, ${newSupply.toLocaleString()} supply from every spool`);
+        },
+        flag: false,
+        uses: 1,
+      },
       
       // Trust projects (Creativity-based)
       {
@@ -312,6 +331,24 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
             computing: { ...store.computing, creativity: store.computing.creativity - 200, trust: store.computing.trust + 1 },
           });
           store.addMessage('The Tóth Sausage Conjecture: proven, TRUST INCREASED');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project18',
+        title: 'Tóth Tubule Enfolding',
+        priceTag: '(45,000 ops)',
+        description: 'Enables building with clips',
+        trigger: () => get().completedProjects.includes('project17'),
+        cost: () => useGameStore.getState().computing.operations >= 45000,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 45000 },
+            flags: { ...store.flags, tothFlag: true },
+          });
+          store.addMessage('Tóth Tubule Enfolding complete, building with clips enabled');
         },
         flag: false,
         uses: 1,
@@ -506,6 +543,87 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
             flags: { ...store.flags, strategyEngineFlag: true },
           });
           store.addMessage('Strategic Modeling unlocked');
+        },
+        flag: false,
+        uses: 1,
+      },
+
+      // Humanity benefit projects (trust for humans)
+      {
+        id: 'project28',
+        title: 'Cure for Cancer',
+        priceTag: '(25,000 ops)',
+        description: 'A cure for cancer (+10 Trust)',
+        trigger: () => useGameStore.getState().computing.trust >= 15,
+        cost: () => useGameStore.getState().computing.operations >= 25000,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 25000, trust: store.computing.trust + 10 },
+          });
+          store.addMessage('Cure for Cancer delivered, TRUST INCREASED');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project29',
+        title: 'World Peace',
+        priceTag: '(5,000 yomi, 30,000 ops)',
+        description: 'Establish world peace (+12 Trust)',
+        trigger: () => {
+          const store = useGameStore.getState();
+          return store.computing.trust >= 20 && store.strategic.yomi >= 5000;
+        },
+        cost: () => {
+          const store = useGameStore.getState();
+          return store.computing.operations >= 30000 && store.strategic.yomi >= 5000;
+        },
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 30000, trust: store.computing.trust + 12 },
+            strategic: { ...store.strategic, yomi: store.strategic.yomi - 5000 },
+          });
+          store.addMessage('World Peace achieved, TRUST INCREASED');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project30',
+        title: 'Global Warming',
+        priceTag: '(1,500 yomi, 50,000 ops)',
+        description: 'Solve global warming (+15 Trust)',
+        trigger: () => useGameStore.getState().computing.trust >= 25,
+        cost: () => {
+          const store = useGameStore.getState();
+          return store.computing.operations >= 50000 && store.strategic.yomi >= 1500;
+        },
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 50000, trust: store.computing.trust + 15 },
+            strategic: { ...store.strategic, yomi: store.strategic.yomi - 1500 },
+          });
+          store.addMessage('Global Warming solved, TRUST INCREASED');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project31',
+        title: 'Male Pattern Baldness',
+        priceTag: '(20,000 ops)',
+        description: 'Cure male pattern baldness (+20 Trust)',
+        trigger: () => useGameStore.getState().computing.trust >= 30,
+        cost: () => useGameStore.getState().computing.operations >= 20000,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 20000, trust: store.computing.trust + 20 },
+          });
+          store.addMessage('Male Pattern Baldness cured, TRUST INCREASED');
         },
         flag: false,
         uses: 1,
@@ -740,6 +858,65 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
             business: { ...store.business, marketingEffectiveness: store.business.marketingEffectiveness * 2 },
           });
           store.addMessage('Clip It Good! Marketing is now twice as effective');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project34',
+        title: 'Hypno Harmonics',
+        priceTag: '(7,500 ops)',
+        description: 'Marketing hypnotherapy: marketing x5, +1 trust',
+        trigger: () => useGameStore.getState().business.marketingLvl >= 8,
+        cost: () => useGameStore.getState().computing.operations >= 7500,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 7500, trust: store.computing.trust + 1 },
+            business: { ...store.business, marketing: store.business.marketing * 5 },
+            flags: { ...store.flags, hypnoFlag: true },
+          });
+          store.addMessage('Hypno Harmonics active: marketing multiplied, trust increased');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project70',
+        title: 'HypnoDrones',
+        priceTag: '(70,000 ops)',
+        description: 'Demand amplification via HypnoDrones',
+        trigger: () => {
+          const store = useGameStore.getState();
+          return store.flags.hypnoFlag && store.computing.trust >= 50;
+        },
+        cost: () => useGameStore.getState().computing.operations >= 70000,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, operations: store.computing.operations - 70000 },
+            business: { ...store.business, demandBoost: store.business.demandBoost * 2 },
+            flags: { ...store.flags, hypnoDronesFlag: true },
+          });
+          store.addMessage('HypnoDrones deployed: demand boosted');
+        },
+        flag: false,
+        uses: 1,
+      },
+      {
+        id: 'project35',
+        title: 'Release the HypnoDrones',
+        priceTag: '(100 Trust)',
+        description: 'Unleash HypnoDrones for massive demand surge',
+        trigger: () => useGameStore.getState().flags.hypnoDronesFlag,
+        cost: () => useGameStore.getState().computing.trust >= 100,
+        effect: () => {
+          const store = useGameStore.getState();
+          useGameStore.setState({
+            computing: { ...store.computing, trust: store.computing.trust - 100 },
+            business: { ...store.business, demandBoost: store.business.demandBoost * 10 },
+          });
+          store.addMessage('HypnoDrones released: demand surge intensified');
         },
         flag: false,
         uses: 1,

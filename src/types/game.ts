@@ -229,6 +229,8 @@ export interface GameFlags {
   wireProductionFlag: boolean;
   creationFlag: boolean;
   tothFlag: boolean;
+  hypnoFlag: boolean;
+  hypnoDronesFlag: boolean;
   milestoneFlag: number; // Tracks which milestones have been shown
 }
 

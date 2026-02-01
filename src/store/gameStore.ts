@@ -292,6 +292,8 @@ const initialState: GameState = {
     wireProductionFlag: false,
     creationFlag: false,
     tothFlag: false,
+    hypnoFlag: false,
+    hypnoDronesFlag: false,
     milestoneFlag: 0,
   },
   
