@@ -13,7 +13,8 @@ export interface BusinessState {
   avgRev: number;
   avgSales: number;
   income: number;
-  incomeTracker: number[];
+  incomeTracker: number[];  // Stores deltas (income earned each second)
+  lastIncomeReading: number; // Previous cumulative income for delta calculation
   demandBoost: number;
 }
 
@@ -26,6 +27,8 @@ export interface ManufacturingState {
   wireBasePrice: number;
   wireSupply: number;
   wirePurchase: number;
+  wirePriceCounter: number;  // Counter for sine wave price calculation
+  wirePriceTimer: number;    // Timer for base price decay
   wireBuyerFlag: boolean;
   wireBuyerStatus: boolean;
   
@@ -50,6 +53,11 @@ export interface ComputingState {
   creativity: number;
   creativityOn: boolean;
   creativitySpeed: number;
+  creativityCounter: number;
+  
+  // Operations tracking (original uses standardOps + tempOps)
+  standardOps: number;
+  tempOps: number;
   
   // Fibonacci for trust milestones
   fib1: number;

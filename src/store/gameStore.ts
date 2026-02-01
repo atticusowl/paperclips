@@ -30,7 +30,8 @@ const initialState: GameState = {
     avgRev: 0,
     avgSales: 0,
     income: 0,
-    incomeTracker: [0],
+    incomeTracker: [0],  // Stores deltas (income per second)
+    lastIncomeReading: 0, // Previous cumulative income
     demandBoost: 1,
   },
   
@@ -43,6 +44,8 @@ const initialState: GameState = {
     wireBasePrice: 20,
     wireSupply: 1000,
     wirePurchase: 0,
+    wirePriceCounter: 0,  // Counter for sine wave
+    wirePriceTimer: 0,    // Timer for base price decay
     wireBuyerFlag: false,
     wireBuyerStatus: true,
     clipmakerLevel: 0,
@@ -63,6 +66,9 @@ const initialState: GameState = {
     creativity: 0,
     creativityOn: false,
     creativitySpeed: 1,
+    creativityCounter: 0,
+    standardOps: 0,
+    tempOps: 0,
     fib1: 2,
     fib2: 3,
     qFlag: false,
@@ -173,6 +179,7 @@ const initialState: GameState = {
 interface GameActions {
   // Core actions
   tick: () => void;
+  slowTick: () => void;
   reset: () => void;
   
   // Manufacturing
@@ -280,33 +287,93 @@ export const useGameStore = create<GameStore>()(
             }
           }
           
-          // Calculate operations
+          // Calculate operations - matches original calculateOperations() exactly
+          // Original runs at 100ms ticks, ours at 10ms, so we divide by 10
           if (s.flags.compFlag) {
-            const opRate = s.computing.processors;
+            const maxOps = s.computing.memory * 1000;
+            let standardOps = newState.computing?.standardOps ?? s.computing.standardOps;
+            let tempOps = newState.computing?.tempOps ?? s.computing.tempOps;
+            
+            // Merge tempOps into standardOps when there's room
+            if (tempOps + standardOps < maxOps) {
+              standardOps = standardOps + tempOps;
+              tempOps = 0;
+            }
+            
+            // Calculate operations from standardOps + tempOps
+            let operations = Math.floor(standardOps + Math.floor(tempOps));
+            
+            // Generate new ops from processors
+            // Original: opCycle = processors/10 per 100ms = processors/sec
+            // Our tick is 10ms, so we add processors/100 per tick
+            if (operations < maxOps) {
+              const opCycle = s.computing.processors / 100;
+              const opBuf = maxOps - operations;
+              
+              const actualAdd = Math.min(opCycle, opBuf);
+              standardOps = standardOps + actualAdd;
+            }
+            
+            // Cap standardOps at max
+            if (standardOps > maxOps) {
+              standardOps = maxOps;
+            }
+            
+            // Recalculate operations
+            operations = Math.floor(standardOps + Math.floor(tempOps));
+            
+            newState.computing = {
+              ...(newState.computing || s.computing),
+              operations,
+              maxOps,
+              standardOps,
+              tempOps,
+            };
+          }
+          
+          // Calculate creativity - matches original calculateCreativity() exactly
+          // Only generates when ops are full
+          if (s.computing.creativityOn) {
+            const currentOps = newState.computing?.operations ?? s.computing.operations;
             const maxOps = s.computing.memory * 1000;
             
-            if (s.computing.operations < maxOps) {
-              const newOps = Math.min(s.computing.operations + opRate, maxOps);
+            if (currentOps >= maxOps) {
+              // Original runs at 100ms, ours at 10ms, so we adjust counter increment
+              // We increment by 0.1 per 10ms tick to match original 1 per 100ms
+              const creativityCounter = (newState.computing?.creativityCounter ?? s.computing.creativityCounter) + 0.1;
+              const creativityThreshold = 400;
+              
+              // prestigeS bonus
+              const prestigeBonus = s.prestige.prestigeS / 10;
+              const ss = s.computing.creativitySpeed + (s.computing.creativitySpeed * prestigeBonus);
+              
+              const creativityCheck = creativityThreshold / ss;
+              
+              let creativity = newState.computing?.creativity ?? s.computing.creativity;
+              let newCounter = creativityCounter;
+              
+              if (creativityCounter >= creativityCheck) {
+                if (creativityCheck >= 1) {
+                  creativity = creativity + 1;
+                } else {
+                  // When creativityCheck < 1, add proportionally more
+                  creativity = creativity + ss / creativityThreshold;
+                }
+                newCounter = 0;
+              }
+              
               newState.computing = {
-                ...s.computing,
-                operations: newOps,
-                maxOps,
+                ...(newState.computing || s.computing),
+                creativity,
+                creativityCounter: newCounter,
               };
             }
           }
           
-          // Calculate creativity
-          if (s.computing.creativityOn && s.computing.operations >= s.computing.maxOps) {
-            newState.computing = {
-              ...newState.computing,
-              creativity: (newState.computing?.creativity ?? s.computing.creativity) + 
-                (s.computing.processors * s.computing.creativitySpeed) / 500,
-            };
-          }
-          
           // Trust milestones (human phase) - uses Fibonacci sequence
+          // Original: if (clips>(nextTrust-1)) - equivalent to clips >= nextTrust for integers
           if (s.flags.humanFlag) {
-            if (s.manufacturing.clips >= s.computing.nextTrust) {
+            if (s.manufacturing.clips > (s.computing.nextTrust - 1)) {
               const fibNext = s.computing.fib1 + s.computing.fib2;
               newState.computing = {
                 ...(newState.computing || s.computing),
@@ -425,7 +492,7 @@ export const useGameStore = create<GameStore>()(
             ];
           }
           
-          // Auto wire buyer
+          // Auto wire buyer (original main.js line 3291: wire <= 1 triggers purchase)
           if (s.manufacturing.wireBuyerFlag && 
               s.manufacturing.wireBuyerStatus && 
               s.manufacturing.wire <= 1 &&
@@ -439,6 +506,7 @@ export const useGameStore = create<GameStore>()(
               wire: s.manufacturing.wire + s.manufacturing.wireSupply,
               wirePurchase: s.manufacturing.wirePurchase + 1,
               wireBasePrice: s.manufacturing.wireBasePrice + 0.05,
+              wirePriceTimer: 0,  // Reset timer on purchase
             };
           }
           
@@ -448,20 +516,84 @@ export const useGameStore = create<GameStore>()(
             const sellChance = s.business.demand / 100;
             if (Math.random() < sellChance) {
               // Match original formula exactly
-              const sellAmount = Math.min(
-                Math.floor(0.7 * Math.pow(s.business.demand, 1.15)),
-                s.business.unsoldClips
-              );
-              if (sellAmount > 0) {
-                const transaction = Math.floor(sellAmount * s.business.margin * 100) / 100;
+              const potentialSell = Math.floor(0.7 * Math.pow(s.business.demand, 1.15));
+              const currentBiz = newState.business || s.business;
+              const unsoldClips = currentBiz.unsoldClips;
+              
+              if (potentialSell > unsoldClips) {
+                // Original: transaction = (Math.floor((unsoldClips * margin)*1000))/1000;
+                const transaction = Math.floor(unsoldClips * s.business.margin * 1000) / 1000;
                 newState.business = {
-                  ...newState.business,
-                  unsoldClips: s.business.unsoldClips - sellAmount,
-                  clipsSold: s.business.clipsSold + sellAmount,
-                  funds: Math.floor((s.business.funds + transaction) * 100) / 100,
+                  ...currentBiz,
+                  unsoldClips: 0,
+                  clipsSold: currentBiz.clipsSold + unsoldClips,
+                  funds: Math.floor((currentBiz.funds + transaction) * 100) / 100,
+                  income: currentBiz.income + transaction,
+                };
+              } else if (potentialSell > 0) {
+                // Original: transaction = (Math.floor((number * margin)*1000))/1000;
+                const transaction = Math.floor(potentialSell * s.business.margin * 1000) / 1000;
+                newState.business = {
+                  ...currentBiz,
+                  unsoldClips: unsoldClips - potentialSell,
+                  clipsSold: currentBiz.clipsSold + potentialSell,
+                  funds: Math.floor((currentBiz.funds + transaction) * 100) / 100,
+                  income: currentBiz.income + transaction,
                 };
               }
             }
+          }
+          
+          // Calculate avgRev and avgSales every 10 ticks (once per second)
+          // Original: secTimer++; if (secTimer >= 10) { calculateRev(); secTimer = 0; }
+          if (s.flags.humanFlag && s.ticks % 10 === 0) {
+            const currentBiz = newState.business || s.business;
+            
+            // Original: incomeThen = incomeNow; incomeNow = income;
+            // Original: incomeLastSecond = Math.round((incomeNow - incomeThen)*100)/100;
+            const incomeThen = currentBiz.lastIncomeReading;
+            const incomeNow = currentBiz.income;
+            const incomeLastSecond = Math.round((incomeNow - incomeThen) * 100) / 100;
+            
+            // Push delta to tracker, keep last 10 entries
+            // Original: incomeTracker.push(incomeLastSecond);
+            const newTracker = [...currentBiz.incomeTracker, incomeLastSecond];
+            if (newTracker.length > 10) {
+              newTracker.splice(0, 1);
+            }
+            
+            // Calculate true avg revenue from tracker (average of deltas)
+            // Original: for (i=0; i<incomeTracker.length; i++) { sum = Math.round((sum + incomeTracker[i])*100)/100; }
+            // Original: trueAvgRev = sum/incomeTracker.length;
+            let sum = 0;
+            for (let i = 0; i < newTracker.length; i++) {
+              sum = Math.round((sum + newTracker[i]) * 100) / 100;
+            }
+            const trueAvgRev = sum / newTracker.length;
+            
+            // Original formula for avgSales and avgRev
+            let chanceOfPurchase = currentBiz.demand / 100;
+            if (chanceOfPurchase > 1) chanceOfPurchase = 1;
+            if (currentBiz.unsoldClips < 1) chanceOfPurchase = 0;
+            
+            // Original: avgSales = chanceOfPurchase * (.7*Math.pow(demand,1.15))*10;
+            // Original: avgRev = chanceOfPurchase * (.7*Math.pow(demand,1.15))*margin*10;
+            let avgSales = chanceOfPurchase * (0.7 * Math.pow(currentBiz.demand, 1.15)) * 10;
+            let avgRev = chanceOfPurchase * (0.7 * Math.pow(currentBiz.demand, 1.15)) * currentBiz.margin * 10;
+            
+            // Original: if (demand>unsoldClips) { avgRev = trueAvgRev; avgSales = avgRev/margin; }
+            if (currentBiz.demand > currentBiz.unsoldClips) {
+              avgRev = trueAvgRev;
+              avgSales = currentBiz.margin > 0 ? avgRev / currentBiz.margin : 0;
+            }
+            
+            newState.business = {
+              ...currentBiz,
+              incomeTracker: newTracker,
+              lastIncomeReading: incomeNow,
+              avgRev,
+              avgSales,
+            };
           }
           
           // Calculate demand (human phase)
@@ -479,12 +611,34 @@ export const useGameStore = create<GameStore>()(
             };
           }
           
-          // Wire price fluctuation
+          // Wire price timer and base price decay (original main.js lines 25-36)
+          // Timer increments each tick, triggers decay if no purchases for 250+ ticks
+          const currentTimer = (newState.manufacturing?.wirePriceTimer ?? s.manufacturing.wirePriceTimer) + 1;
+          let currentBasePrice = newState.manufacturing?.wireBasePrice ?? s.manufacturing.wireBasePrice;
+          let newTimer = currentTimer;
+          
+          if (currentTimer > 250 && currentBasePrice > 15) {
+            currentBasePrice = currentBasePrice - (currentBasePrice / 1000);
+            newTimer = 0;
+          }
+          
+          // Wire price fluctuation (1.5% chance each tick)
+          // Uses dedicated counter that only increments when price updates
           if (Math.random() < 0.015) {
-            const wireAdjust = 6 * Math.sin(s.ticks / 100);
+            const newPriceCounter = s.manufacturing.wirePriceCounter + 1;
+            const wireAdjust = 6 * Math.sin(newPriceCounter);
             newState.manufacturing = {
               ...newState.manufacturing,
-              wireCost: Math.max(15, Math.ceil(s.manufacturing.wireBasePrice + wireAdjust)),
+              wireCost: Math.ceil(currentBasePrice + wireAdjust),
+              wireBasePrice: currentBasePrice,
+              wirePriceCounter: newPriceCounter,
+              wirePriceTimer: newTimer,
+            };
+          } else {
+            newState.manufacturing = {
+              ...newState.manufacturing,
+              wireBasePrice: currentBasePrice,
+              wirePriceTimer: newTimer,
             };
           }
           
@@ -507,6 +661,11 @@ export const useGameStore = create<GameStore>()(
       },
       
       reset: () => set({ ...initialState, messages: [{ id: messageId++, text: 'Welcome to Universal Paperclips', timestamp: Date.now() }] }),
+      
+      // Slow tick - runs less frequently than main tick (for expensive calculations)
+      slowTick: () => {
+        // Placeholder for future use
+      },
       
       // Manufacturing
       makeClip: (amount = 1) => {
@@ -555,6 +714,7 @@ export const useGameStore = create<GameStore>()(
               wire: s.manufacturing.wire + s.manufacturing.wireSupply,
               wirePurchase: s.manufacturing.wirePurchase + 1,
               wireBasePrice: s.manufacturing.wireBasePrice + 0.05,
+              wirePriceTimer: 0,  // Reset timer on purchase (original line 52)
             },
           };
         });
@@ -574,7 +734,8 @@ export const useGameStore = create<GameStore>()(
           if (s.business.funds < s.manufacturing.clipperCost) return s;
           
           const newLevel = s.manufacturing.clipmakerLevel + 1;
-          const newCost = Math.round(1.1 * s.manufacturing.clipperCost * 100) / 100;
+          // Original formula: clipperCost = Math.pow(1.1, clipmakerLevel) + 5 (main.js line 1673)
+          const newCost = Math.pow(1.1, newLevel) + 5;
           
           // Show autoclippers section if first one
           const newFlags = newLevel === 1 ? { ...s.flags, autoClipperFlag: true } : s.flags;
@@ -599,7 +760,8 @@ export const useGameStore = create<GameStore>()(
           if (s.business.funds < s.manufacturing.megaClipperCost) return s;
           
           const newLevel = s.manufacturing.megaClipperLevel + 1;
-          const newCost = Math.round(1.07 * s.manufacturing.megaClipperCost);
+          // Original formula: megaClipperCost = Math.pow(1.07, megaClipperLevel) * 1000 (main.js line 1686)
+          const newCost = Math.pow(1.07, newLevel) * 1000;
           
           return {
             business: {
@@ -663,12 +825,17 @@ export const useGameStore = create<GameStore>()(
           const available = s.computing.trust - (s.computing.processors + s.computing.memory) + s.swarm.swarmGifts;
           if (available <= 0) return s;
           
+          const newProcessors = s.computing.processors + 1;
+          // Original formula: creativitySpeed = Math.log10(processors) * Math.pow(processors,1.1) + processors-1;
+          const newCreativitySpeed = Math.log10(newProcessors) * Math.pow(newProcessors, 1.1) + newProcessors - 1;
+          
           // Use swarm gift if no trust available
           if (s.computing.trust <= s.computing.processors + s.computing.memory && s.swarm.swarmGifts > 0) {
             return {
               computing: {
                 ...s.computing,
-                processors: s.computing.processors + 1,
+                processors: newProcessors,
+                creativitySpeed: newCreativitySpeed,
               },
               swarm: {
                 ...s.swarm,
@@ -680,7 +847,8 @@ export const useGameStore = create<GameStore>()(
           return {
             computing: {
               ...s.computing,
-              processors: s.computing.processors + 1,
+              processors: newProcessors,
+              creativitySpeed: newCreativitySpeed,
             },
           };
         });
@@ -717,17 +885,35 @@ export const useGameStore = create<GameStore>()(
       
       computeQuantum: () => {
         set((s) => {
-          const activeChips = s.computing.qChips.filter(c => c.active);
-          if (activeChips.length === 0) return s;
+          // Original checks qChips[0].active specifically
+          if (!s.computing.qChips[0]?.active) return s;
           
-          const q = activeChips.reduce((sum, chip) => sum + chip.value, 0);
-          const ops = Math.ceil(q * 360);
+          // Sum all chip values (inactive chips have value 0)
+          const q = s.computing.qChips.reduce((sum, chip) => sum + chip.value, 0);
+          let qq = Math.ceil(q * 360);
+          
           const maxOps = s.computing.memory * 1000;
+          const buffer = maxOps - s.computing.standardOps;
+          let tempOps = s.computing.tempOps;
+          let standardOps = s.computing.standardOps;
+          
+          // Original overflow behavior with damper
+          if (qq > buffer) {
+            const damper = (tempOps / 100) + 5;
+            tempOps = tempOps + Math.ceil(qq / damper) - buffer;
+            qq = buffer;
+          }
+          
+          standardOps = standardOps + qq;
+          
+          const operations = Math.floor(standardOps + Math.floor(tempOps));
           
           return {
             computing: {
               ...s.computing,
-              operations: Math.min(s.computing.operations + ops, maxOps),
+              operations,
+              standardOps,
+              tempOps,
             },
           };
         });

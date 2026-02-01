@@ -2,10 +2,16 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useProjectsStore } from '../store/projectsStore';
 
-const TICK_RATE = 10; // 10ms = 100 ticks per second (like original game)
+// Original game has TWO loops:
+// - Fast loop at 10ms: ticks, autoclippers, operations, creativity, milestones
+// - Slow loop at 100ms: sales, wire price fluctuation, revenue calculation
+
+const FAST_TICK_RATE = 10; // 10ms - matches original main loop
+const SLOW_TICK_RATE = 100; // 100ms - matches original slow loop
 
 export function useGameLoop() {
   const tick = useGameStore((s) => s.tick);
+  const slowTick = useGameStore((s) => s.slowTick);
   const checkProjects = useProjectsStore((s) => s.checkProjects);
   const initializeProjects = useProjectsStore((s) => s.initializeProjects);
   const initialized = useRef(false);
@@ -18,20 +24,29 @@ export function useGameLoop() {
     }
   }, [initializeProjects]);
   
-  // Main game loop
+  // Fast game loop (10ms) - autoclippers, operations, creativity, milestones
   useEffect(() => {
     const gameLoop = setInterval(() => {
       tick();
-    }, TICK_RATE);
+    }, FAST_TICK_RATE);
     
     return () => clearInterval(gameLoop);
   }, [tick]);
   
-  // Project check loop (less frequent)
+  // Slow game loop (100ms) - sales, wire price, revenue
+  useEffect(() => {
+    const slowLoop = setInterval(() => {
+      slowTick();
+    }, SLOW_TICK_RATE);
+    
+    return () => clearInterval(slowLoop);
+  }, [slowTick]);
+  
+  // Project check loop (every 100ms like original)
   useEffect(() => {
     const projectLoop = setInterval(() => {
       checkProjects();
-    }, 100); // Check projects every 100ms
+    }, 100);
     
     return () => clearInterval(projectLoop);
   }, [checkProjects]);
