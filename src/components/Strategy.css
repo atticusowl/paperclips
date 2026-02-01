@@ -1,52 +1,33 @@
-.strategy-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+.strategy-section {
+  margin: 5px;
+  border: 1px solid grey;
+  padding: 5px;
 }
 
-.strategy-controls select {
-  background: #333;
-  border: 1px solid #555;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 3px;
-  font-size: 12px;
-  flex: 1;
-}
-
-.tourney-display {
-  background: #252525;
-  padding: 10px;
-  border-radius: 3px;
-  margin: 10px 0;
-  min-height: 60px;
-}
-
-.tourney-display p {
-  font-size: 11px;
-  margin: 3px 0;
-}
-
-.yomi-display {
+.strategy-section h3 {
+  margin: 0 0 5px 0;
   font-size: 14px;
-  margin: 10px 0;
 }
 
-.tourney-management {
+.tournament-controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-top: 10px;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.tournament-controls button {
+  padding: 2px 8px;
+  font-size: 12px;
 }
 
 .auto-tourney {
+  margin-top: 8px;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.auto-tourney .status {
-  margin-left: 8px;
-  color: #00ff88;
-  font-weight: bold;
+.yomi-display {
+  margin-top: 10px;
+  font-size: 13px;
 }

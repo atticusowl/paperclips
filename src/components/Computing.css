@@ -1,43 +1,61 @@
-.computing .trust-section {
+.computing-section {
+  margin-bottom: 15px;
+}
+
+.trust-controls {
+  display: flex;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
-.computing .resource-controls {
+.trust-controls > div {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 8px 0;
+  gap: 4px;
 }
 
-.computing .resource-controls button {
-  min-width: 100px;
+.trust-controls button {
+  padding: 2px 8px;
+  min-width: 70px;
 }
 
-.computing .level {
-  font-weight: bold;
-  color: #00ff88;
+.trust-controls span {
+  min-width: 20px;
+  text-align: center;
 }
 
 .quantum-section {
-  margin-top: 15px;
-  padding-top: 10px;
-  border-top: 1px solid #333;
+  margin: 5px;
+  border: 1px solid grey;
+  padding: 5px;
+  height: auto;
 }
 
 .quantum-section h4 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
+  margin: 0 0 5px 0;
+  font-size: 13px;
 }
 
-.qchips {
+.q-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
-  margin-bottom: 10px;
+  margin: 8px 0;
 }
 
-.qchip {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-  transition: opacity 0.05s ease;
+.q-chip {
+  width: 22px;
+  height: 22px;
+  background: black;
+  border: none;
+  cursor: pointer;
+}
+
+.q-chip.active {
+  background: white;
+  border: 1px solid black;
+}
+
+.compute-btn {
+  margin-top: 8px;
 }

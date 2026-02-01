@@ -312,6 +312,21 @@ export const useGameStore = create<GameStore>()(
             }
           }
           
+          // Unlock computing when: clips >= 2000 OR player is stuck
+          if (!s.flags.compFlag && s.flags.humanFlag) {
+            const isStuck = s.business.unsoldClips < 1 && 
+                           s.business.funds < s.manufacturing.wireCost && 
+                           s.manufacturing.wire < 1;
+            const hasEnoughClips = Math.ceil(s.manufacturing.clips) >= 2000;
+            
+            if (isStuck || hasEnoughClips) {
+              newState.flags = {
+                ...newState.flags,
+                compFlag: true,
+              };
+            }
+          }
+          
           // Auto wire buyer
           if (s.manufacturing.wireBuyerFlag && 
               s.manufacturing.wireBuyerStatus && 

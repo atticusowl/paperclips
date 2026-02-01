@@ -1,71 +1,40 @@
-.investment .invest-controls {
-  margin-bottom: 10px;
+.investment-section {
+  margin: 5px;
+  border: 1px solid grey;
+  padding: 5px;
 }
 
-.investment .invest-controls select {
-  background: #333;
-  border: 1px solid #555;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 3px;
-  font-size: 12px;
-  width: 100%;
+.investment-section h3 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
 }
 
-.invest-buttons {
+.investment-controls {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 8px;
+  margin: 8px 0;
 }
 
-.invest-buttons button {
-  flex: 1;
+.investment-controls button {
+  padding: 2px 8px;
+  font-size: 12px;
 }
 
-.portfolio-summary {
-  background: #252525;
-  padding: 10px;
-  border-radius: 3px;
-  margin-bottom: 10px;
+.portfolio {
+  margin-top: 10px;
+  font-size: 13px;
 }
 
-.portfolio-summary p {
-  margin: 4px 0;
-}
-
-.stocks-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-  margin: 10px 0;
-}
-
-.stocks-table th,
-.stocks-table td {
-  padding: 4px 6px;
-  text-align: left;
-  border-bottom: 1px solid #333;
-}
-
-.stocks-table th {
-  color: #888;
-  font-weight: normal;
-}
-
-.stocks-table .profit {
-  color: #00ff88;
-}
-
-.stocks-table .loss {
-  color: #ff4444;
+.portfolio p {
+  margin: 3px 0;
 }
 
 .upgrade-section {
-  margin-top: 15px;
-  padding-top: 10px;
-  border-top: 1px solid #333;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
 }
 
 .upgrade-section button {
-  margin-bottom: 5px;
+  margin-top: 5px;
 }

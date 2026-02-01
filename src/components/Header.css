@@ -1,31 +1,32 @@
 .header {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .prestige-display {
-  font-size: 12px;
-  color: #888;
+  background-color: lightgrey;
+  padding: 2px 5px;
+  font-size: 13px;
   margin-bottom: 5px;
 }
 
 .clip-counter {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: normal;
   margin: 0;
-  color: #fff;
+  color: black;
+  line-height: 70%;
 }
 
 .clip-counter .count {
-  color: #00ff88;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .clip-rate {
-  font-size: 14px;
-  color: #888;
+  font-size: 13px;
+  color: black;
   margin: 5px 0 0 0;
 }
 
 .clip-rate .rate {
-  color: #00cc66;
+  /* inherit */
 }
