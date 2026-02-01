@@ -354,30 +354,38 @@ export const useGameStore = create<GameStore>()(
           }
           
           // Sell clips (human phase, every tick based on demand)
+          // Original: if (Math.random() < (demand/100)) { sellClips(Math.floor(.7 * Math.pow(demand, 1.15))); }
           if (s.flags.humanFlag && s.business.unsoldClips > 0) {
             const sellChance = s.business.demand / 100;
             if (Math.random() < sellChance) {
+              // Match original formula exactly
               const sellAmount = Math.min(
-                Math.ceil(Math.random() * Math.max(1, s.business.demand / 10)),
+                Math.floor(0.7 * Math.pow(s.business.demand, 1.15)),
                 s.business.unsoldClips
               );
-              newState.business = {
-                ...newState.business,
-                unsoldClips: s.business.unsoldClips - sellAmount,
-                clipsSold: s.business.clipsSold + sellAmount,
-                funds: s.business.funds + (sellAmount * s.business.margin),
-              };
+              if (sellAmount > 0) {
+                const transaction = Math.floor(sellAmount * s.business.margin * 100) / 100;
+                newState.business = {
+                  ...newState.business,
+                  unsoldClips: s.business.unsoldClips - sellAmount,
+                  clipsSold: s.business.clipsSold + sellAmount,
+                  funds: Math.floor((s.business.funds + transaction) * 100) / 100,
+                };
+              }
             }
           }
           
           // Calculate demand (human phase)
+          // Original: marketing = (Math.pow(1.1,(marketingLvl-1)));
+          //           demand = (((.8/margin) * marketing * marketingEffectiveness)*demandBoost);
+          //           demand = demand + ((demand/10)*prestigeU);
           if (s.flags.humanFlag) {
             const marketing = Math.pow(1.1, s.business.marketingLvl - 1);
-            const demand = ((0.8 / s.business.margin) * marketing * s.business.marketingEffectiveness * s.business.demandBoost) +
-                          (((0.8 / s.business.margin) * marketing * s.business.marketingEffectiveness * s.business.demandBoost) / 10) * s.prestige.prestigeU;
+            let demand = ((0.8 / s.business.margin) * marketing * s.business.marketingEffectiveness * s.business.demandBoost);
+            demand = demand + ((demand / 10) * s.prestige.prestigeU);
             newState.business = {
               ...newState.business,
-              demand: Math.min(demand, 1000),
+              demand,
               marketing,
             };
           }
@@ -542,7 +550,8 @@ export const useGameStore = create<GameStore>()(
           if (s.business.funds < s.business.adCost) return s;
           
           const newLevel = s.business.marketingLvl + 1;
-          const newCost = Math.round(s.business.adCost * 2);
+          // Original: adCost = Math.floor(adCost * 2);
+          const newCost = Math.floor(s.business.adCost * 2);
           
           return {
             business: {

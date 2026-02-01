@@ -36,7 +36,7 @@ export function Business() {
         <span> Price per Clip: $ {margin < 1 ? margin.toFixed(2).substring(1) : margin.toFixed(2)}</span>
       </div>
       
-      <p>Public Demand: <span className="value">{Math.round(demand)}%</span></p>
+      <p>Public Demand: <span className="value">{Math.round(demand * 10)}%</span></p>
       
       <div className="marketing-section">
         <button 
@@ -45,8 +45,8 @@ export function Business() {
         >
           Marketing
         </button>
-        <span className="level">Level: {marketingLvl}</span>
-        <p className="cost">Cost: ${formatMoney(adCost)}</p>
+        <span className="level"> Level: {marketingLvl}</span>
+        <p className="cost">Cost: $ {adCost.toFixed(2)}</p>
       </div>
     </div>
   );
