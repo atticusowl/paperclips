@@ -1,7 +1,8 @@
 // Number formatting utilities for Universal Paperclips
+// Matches the original game's formatting exactly
 
 const SUFFIXES = [
-  '', 'thousand', 'million', 'billion', 'trillion', 'quadrillion',
+  '', '', 'million', 'billion', 'trillion', 'quadrillion',
   'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion',
   'decillion', 'undecillion', 'duodecillion', 'tredecillion',
   'quattuordecillion', 'quindecillion', 'sexdecillion', 'septendecillion',
@@ -9,40 +10,48 @@ const SUFFIXES = [
 ];
 
 /**
- * Formats large numbers with suffixes (like the original game's numberCruncher)
+ * Formats numbers like the original game
+ * - Under 1 million: use toLocaleString (e.g., "2,000", "999,999")
+ * - 1 million+: use word suffixes (e.g., "1.50 million")
  */
-export function formatNumber(num: number, precision = 0): string {
-  if (num < 1000) {
-    return precision > 0 ? num.toFixed(precision) : Math.floor(num).toString();
+export function formatNumber(num: number, decimals = 0): string {
+  if (num < 0) {
+    return '-' + formatNumber(-num, decimals);
   }
   
+  // Under 1 million: use comma formatting
+  if (num < 1000000) {
+    if (decimals > 0) {
+      return num.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+    return Math.floor(num).toLocaleString();
+  }
+  
+  // 1 million+: use word suffixes like original numberCruncher
   const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
   
-  if (tier === 0) {
-    return num.toLocaleString();
-  }
-  
-  if (tier < SUFFIXES.length) {
+  if (tier < SUFFIXES.length && SUFFIXES[tier]) {
     const scale = Math.pow(10, tier * 3);
     const scaled = num / scale;
     return `${scaled.toFixed(2)} ${SUFFIXES[tier]}`;
   }
   
-  // For extremely large numbers, use scientific notation
+  // Fallback for extremely large numbers
   return num.toExponential(2);
 }
 
 /**
  * Formats currency values
+ * Original uses toLocaleString with 2 decimal places
  */
 export function formatMoney(num: number): string {
-  if (num < 1000000) {
-    return num.toLocaleString(undefined, { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    });
-  }
-  return formatNumber(num, 2);
+  return num.toLocaleString(undefined, { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
 }
 
 /**
