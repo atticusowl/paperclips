@@ -1,11 +1,14 @@
 import { useProjectsStore } from '../store/projectsStore';
+import { useGameStore } from '../store/gameStore';
 import './Projects.css';
 
 export function Projects() {
   const activeProjects = useProjectsStore((s) => s.activeProjects);
   const executeProject = useProjectsStore((s) => s.executeProject);
+  const { projectsFlag } = useGameStore((s) => s.flags);
   
-  if (activeProjects.length === 0) return null;
+  // Projects only visible when projectsFlag is true (unlocked with computing)
+  if (!projectsFlag || activeProjects.length === 0) return null;
   
   return (
     <div className="section projects">

@@ -15,8 +15,13 @@ import './App.css';
 function App() {
   useGameLoop();
   
-  const { humanFlag, compFlag, strategyEngineFlag, investmentEngineFlag } = useGameStore((s) => s.flags);
+  const { humanFlag, compFlag, projectsFlag, strategyEngineFlag, investmentEngineFlag } = useGameStore((s) => s.flags);
   const reset = useGameStore((s) => s.reset);
+  
+  // Show middle column only when computing or projects are visible
+  const showMiddle = compFlag || projectsFlag;
+  // Show right column only when strategy or investment are visible
+  const showRight = strategyEngineFlag || investmentEngineFlag;
   
   return (
     <div className="app">
@@ -35,19 +40,23 @@ function App() {
             <Manufacturing />
           </div>
           
-          {/* Middle Column */}
-          <div className="column middle">
-            {compFlag && <Computing />}
-            
-            <Projects />
-          </div>
+          {/* Middle Column - only show when unlocked */}
+          {showMiddle && (
+            <div className="column middle">
+              {compFlag && <Computing />}
+              
+              <Projects />
+            </div>
+          )}
           
-          {/* Right Column */}
-          <div className="column right">
-            {strategyEngineFlag && <Strategy />}
-            
-            {investmentEngineFlag && <Investment />}
-          </div>
+          {/* Right Column - only show when unlocked */}
+          {showRight && (
+            <div className="column right">
+              {strategyEngineFlag && <Strategy />}
+              
+              {investmentEngineFlag && <Investment />}
+            </div>
+          )}
         </div>
         
         {/* Save/Load Controls */}

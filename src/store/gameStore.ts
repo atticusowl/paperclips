@@ -312,7 +312,15 @@ export const useGameStore = create<GameStore>()(
             }
           }
           
-          // Unlock computing when: clips >= 2000 OR player is stuck
+          // Unlock autoClippers when funds >= 5
+          if (!s.flags.autoClipperFlag && s.business.funds >= 5) {
+            newState.flags = {
+              ...(newState.flags || s.flags),
+              autoClipperFlag: true,
+            };
+          }
+          
+          // Unlock computing + projects when: clips >= 2000 OR player is stuck
           if (!s.flags.compFlag && s.flags.humanFlag) {
             const isStuck = s.business.unsoldClips < 1 && 
                            s.business.funds < s.manufacturing.wireCost && 
@@ -321,8 +329,9 @@ export const useGameStore = create<GameStore>()(
             
             if (isStuck || hasEnoughClips) {
               newState.flags = {
-                ...newState.flags,
+                ...(newState.flags || s.flags),
                 compFlag: true,
+                projectsFlag: true,
               };
             }
           }
