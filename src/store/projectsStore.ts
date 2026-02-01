@@ -274,16 +274,13 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         uses: 1,
       },
       
-      // MegaClippers
+      // MegaClippers - original trigger: clipmakerLevel>=75
       {
         id: 'projectMega',
         title: 'MegaClippers',
         priceTag: '(12,000 ops)',
-        description: 'Unlocks MegaClippers: each produces 500 clips/sec',
-        trigger: () => {
-          const store = useGameStore.getState();
-          return store.manufacturing.clipmakerLevel >= 75 && store.computing.operations >= 12000;
-        },
+        description: '500x more powerful than a standard AutoClipper',
+        trigger: () => useGameStore.getState().manufacturing.clipmakerLevel >= 75,
         cost: () => useGameStore.getState().computing.operations >= 12000,
         effect: () => {
           const store = useGameStore.getState();
@@ -291,7 +288,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
             computing: { ...store.computing, operations: store.computing.operations - 12000 },
             flags: { ...store.flags, megaClipperFlag: true },
           });
-          store.addMessage('MegaClippers unlocked');
+          store.addMessage('MegaClipper technology online');
         },
         flag: false,
         uses: 1,
@@ -317,13 +314,13 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         uses: 1,
       },
       
-      // Revenue Per Second display
+      // Revenue Per Second display - original trigger: projectsFlag == 1
       {
         id: 'projectRevSec',
         title: 'RevTracker',
         priceTag: '(500 ops)',
-        description: 'Displays revenue and sales statistics',
-        trigger: () => useGameStore.getState().business.clipsSold >= 10,
+        description: 'Automatically calculates average revenue per second',
+        trigger: () => useGameStore.getState().flags.projectsFlag === true,
         cost: () => useGameStore.getState().computing.operations >= 500,
         effect: () => {
           const store = useGameStore.getState();

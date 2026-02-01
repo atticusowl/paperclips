@@ -1,26 +1,91 @@
 // Number formatting utilities for Universal Paperclips
-// Matches the original game's formatting exactly
-
-const SUFFIXES = [
-  '', '', 'million', 'billion', 'trillion', 'quadrillion',
-  'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion',
-  'decillion', 'undecillion', 'duodecillion', 'tredecillion',
-  'quattuordecillion', 'quindecillion', 'sexdecillion', 'septendecillion',
-  'octodecillion', 'novemdecillion', 'vigintillion'
-];
+// Matches the original game's numberCruncher function exactly
 
 /**
- * Formats numbers like the original game
- * - Under 1 million: use toLocaleString (e.g., "2,000", "999,999")
- * - 1 million+: use word suffixes (e.g., "1.50 million")
+ * Formats numbers exactly like the original game's numberCruncher function
+ * Original thresholds:
+ * - > 999: "X.XX thousand"
+ * - > 999,999: "X.XX million"
+ * - > 999,999,999: "X.XX billion"
+ * - etc.
+ * 
+ * Note: For display of clips in human phase, original uses toLocaleString directly
+ */
+export function numberCruncher(num: number, decimals = 2): string {
+  let suffix = '';
+  let precision = decimals;
+  let number = num;
+  
+  if (number > 999999999999999999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000000000000000000;
+    suffix = 'sexdecillion';
+  } else if (number > 999999999999999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000000000000000;
+    suffix = 'quindecillion';
+  } else if (number > 999999999999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000000000000;
+    suffix = 'quattuordecillion';
+  } else if (number > 999999999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000000000;
+    suffix = 'tredecillion';
+  } else if (number > 999999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000000;
+    suffix = 'duodecillion';
+  } else if (number > 999999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000000;
+    suffix = 'undecillion';
+  } else if (number > 999999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000000;
+    suffix = 'decillion';
+  } else if (number > 999999999999999999999999999999) {
+    number = number / 1000000000000000000000000000000;
+    suffix = 'nonillion';
+  } else if (number > 999999999999999999999999999) {
+    number = number / 1000000000000000000000000000;
+    suffix = 'octillion';
+  } else if (number > 999999999999999999999999) {
+    number = number / 1000000000000000000000000;
+    suffix = 'septillion';
+  } else if (number > 999999999999999999999) {
+    number = number / 1000000000000000000000;
+    suffix = 'sextillion';
+  } else if (number > 999999999999999999) {
+    number = number / 1000000000000000000;
+    suffix = 'quintillion';
+  } else if (number > 999999999999999) {
+    number = number / 1000000000000000;
+    suffix = 'quadrillion';
+  } else if (number > 999999999999) {
+    number = number / 1000000000000;
+    suffix = 'trillion';
+  } else if (number > 999999999) {
+    number = number / 1000000000;
+    suffix = 'billion';
+  } else if (number > 999999) {
+    number = number / 1000000;
+    suffix = 'million';
+  } else if (number > 999) {
+    number = number / 1000;
+    suffix = 'thousand';
+  } else if (number < 1000) {
+    precision = 0;
+  }
+  
+  return number.toFixed(precision) + ' ' + suffix;
+}
+
+/**
+ * Formats numbers for display
+ * - Under 1000: plain integer with commas
+ * - 1000+: use numberCruncher with word suffixes
  */
 export function formatNumber(num: number, decimals = 0): string {
   if (num < 0) {
     return '-' + formatNumber(-num, decimals);
   }
   
-  // Under 1 million: use comma formatting
-  if (num < 1000000) {
+  // Under 1000: use comma formatting (original uses toLocaleString for small numbers)
+  if (num < 1000) {
     if (decimals > 0) {
       return num.toLocaleString(undefined, {
         minimumFractionDigits: decimals,
@@ -30,17 +95,8 @@ export function formatNumber(num: number, decimals = 0): string {
     return Math.floor(num).toLocaleString();
   }
   
-  // 1 million+: use word suffixes like original numberCruncher
-  const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
-  
-  if (tier < SUFFIXES.length && SUFFIXES[tier]) {
-    const scale = Math.pow(10, tier * 3);
-    const scaled = num / scale;
-    return `${scaled.toFixed(2)} ${SUFFIXES[tier]}`;
-  }
-  
-  // Fallback for extremely large numbers
-  return num.toExponential(2);
+  // 1000+: use numberCruncher format
+  return numberCruncher(num, 2);
 }
 
 /**
