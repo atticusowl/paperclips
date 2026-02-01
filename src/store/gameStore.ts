@@ -33,6 +33,7 @@ const initialState: GameState = {
     incomeTracker: [0],  // Stores deltas (income per second)
     lastIncomeReading: 0, // Previous cumulative income
     demandBoost: 1,
+    secTimer: 0,  // Timer for revenue calculation
   },
   
   manufacturing: {
@@ -621,11 +622,11 @@ export const useGameStore = create<GameStore>()(
           
           // Revenue calculation every 10 slow ticks (once per second)
           // Track with a counter in business state
-          const secTimer = ((s.business as any).secTimer ?? 0) + 1;
+          const secTimer = (s.business.secTimer ?? 0) + 1;
           if (s.flags.humanFlag && secTimer >= 10) {
             const currentBiz = newState.business ?? s.business;
             
-            const incomeThen = (currentBiz as any).lastIncomeReading ?? 0;
+            const incomeThen = currentBiz.lastIncomeReading ?? 0;
             const incomeNow = currentBiz.income;
             const incomeLastSecond = Math.round((incomeNow - incomeThen) * 100) / 100;
             
@@ -659,12 +660,12 @@ export const useGameStore = create<GameStore>()(
               avgRev,
               avgSales,
               secTimer: 0,
-            } as any;
+            };
           } else if (s.flags.humanFlag) {
             newState.business = {
               ...(newState.business ?? s.business),
               secTimer,
-            } as any;
+            };
           }
           
           return newState as GameState;

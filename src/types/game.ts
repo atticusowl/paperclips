@@ -16,6 +16,7 @@ export interface BusinessState {
   incomeTracker: number[];  // Stores deltas (income earned each second)
   lastIncomeReading: number; // Previous cumulative income for delta calculation
   demandBoost: number;
+  secTimer: number;  // Timer for revenue calculation (fires every 10 slow ticks)
 }
 
 export interface ManufacturingState {
