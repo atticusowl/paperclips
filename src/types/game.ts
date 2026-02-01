@@ -51,6 +51,10 @@ export interface ComputingState {
   creativityOn: boolean;
   creativitySpeed: number;
   
+  // Fibonacci for trust milestones
+  fib1: number;
+  fib2: number;
+  
   // Quantum Computing
   qFlag: boolean;
   qChips: QChip[];

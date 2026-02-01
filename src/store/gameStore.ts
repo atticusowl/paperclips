@@ -63,6 +63,8 @@ const initialState: GameState = {
     creativity: 0,
     creativityOn: false,
     creativitySpeed: 1,
+    fib1: 2,
+    fib2: 3,
     qFlag: false,
     qChips: createQChips(),
     qClock: 0,
@@ -302,14 +304,22 @@ export const useGameStore = create<GameStore>()(
             };
           }
           
-          // Trust milestones (human phase)
+          // Trust milestones (human phase) - uses Fibonacci sequence
           if (s.flags.humanFlag) {
             if (s.manufacturing.clips >= s.computing.nextTrust) {
+              const fibNext = s.computing.fib1 + s.computing.fib2;
               newState.computing = {
-                ...newState.computing,
+                ...(newState.computing || s.computing),
                 trust: s.computing.trust + 1,
-                nextTrust: Math.round(s.computing.nextTrust * 1.36),
+                nextTrust: fibNext * 1000,
+                fib1: s.computing.fib2,
+                fib2: fibNext,
               };
+              // Add trust increase message
+              newState.messages = [
+                { id: Date.now(), text: 'Production target met: TRUST INCREASED, additional processor/memory capacity granted', timestamp: Date.now() },
+                ...(newState.messages || s.messages).slice(0, 4),
+              ];
             }
           }
           
